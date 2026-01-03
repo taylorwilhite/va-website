@@ -1,8 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import styles from "./page.module.css";
+import Image from "next/image";
 
 export default function Home() {
+  const [playing, setPlaying] = useState<number | null>(null);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(
+    null
+  );
+
   const voiceCharacteristics = [
     { label: "Range", value: "Bass to Alto" },
     {
@@ -17,18 +24,50 @@ export default function Home() {
       title: "Audiobook - Adult Sci-fi",
       description: "Sci-fi spy novel narration",
       year: "2025",
+      audioUrl:
+        "https://res.cloudinary.com/dwqfywook/video/upload/v1767400546/Fiction_Audiobook_Sample_u2zwor.mp3",
     },
     {
       title: "Audiobook - Non-fiction",
       description: "Management skills book narration",
       year: "2025",
+      audioUrl:
+        "https://res.cloudinary.com/dwqfywook/video/upload/v1767400526/Nonfiction_Audiobook_Sample_rppgfp.mp3",
     },
     {
       title: "Animation Character Reel",
       description: "Multiple character voices for animated series",
       year: "2023",
+      audioUrl:
+        "https://res.cloudinary.com/dwqfywook/video/upload/v1767400564/Animation_Voice_Reel_d0swjx.mp3",
     },
   ];
+
+  const handlePlayPause = (idx: number, audioUrl: string) => {
+    if (playing === idx && audioElement) {
+      // Stop playing current
+      audioElement.pause();
+      setPlaying(null);
+    } else {
+      // Stop previous audio if any
+      if (audioElement) {
+        audioElement.pause();
+      }
+
+      // Play new audio
+      const audio = new Audio(audioUrl);
+      setAudioElement(audio);
+      audio.play().catch((error) => {
+        console.error("Error playing audio:", error);
+      });
+
+      audio.addEventListener("ended", () => {
+        setPlaying(null);
+      });
+
+      setPlaying(idx);
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -55,7 +94,12 @@ export default function Home() {
             </div>
             <div className={styles.profileImage}>
               <div className={styles.imagePlaceholder}>
-                <span>Professional Headshot</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="https://res.cloudinary.com/dwqfywook/image/upload/v1767401837/square_headshot_054765.jpg"
+                  alt="Professional Headshot"
+                  className={styles.profileImage}
+                />
               </div>
             </div>
           </div>
@@ -70,7 +114,12 @@ export default function Home() {
                 <div className={styles.projectYear}>{project.year}</div>
                 <h3 className={styles.projectTitle}>{project.title}</h3>
                 <p className={styles.projectDesc}>{project.description}</p>
-                <button className={styles.playButton}>▶ Listen Sample</button>
+                <button
+                  className={styles.playButton}
+                  onClick={() => handlePlayPause(idx, project.audioUrl)}
+                >
+                  {playing === idx ? "⏸ Stop" : "▶ Listen Sample"}
+                </button>
               </div>
             ))}
           </div>
